@@ -8,5 +8,5 @@ if(__name__ == "__main__"):
     print('\tCSV File: {}'.format(args[0]))
 
     with open(args[0]) as csv_file:
-        spamreader = csv.reader(csvfile, delimiter='|')
+        spamreader = csv.reader(csv_file, delimiter='|')
         print(len(spamreader))
