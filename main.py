@@ -2,5 +2,11 @@ import csv
 import sys
 
 if(__name__ == "__main__"):
-    print '参数个数为:', len(sys.argv), '个参数。'
-    print '参数列表:', str(sys.argv)
+    args = sys.argv[1:]
+
+    print('Command Line:')
+    print('\tCSV File: {}'.format(args[0]))
+
+    with open(args[0]) as csv_file:
+        spamreader = csv.reader(csvfile, delimiter='|')
+        print(len(spamreader))
