@@ -126,6 +126,7 @@ if(__name__ == "__main__"):
     column_datas = []
     row_datas = []
     for i in range(len(files)):
+        print('Reading {}th csv file...'.format(i))
         file_path = os.path.join(args[0], files[i])
 
         dimension = []
