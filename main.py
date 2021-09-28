@@ -2,6 +2,7 @@ import csv
 import sys
 import os
 import string
+import time
 
 def readCSVFile(dimension, column_data, row_data, file_path):
     with open(file_path) as csv_file:
@@ -9,22 +10,29 @@ def readCSVFile(dimension, column_data, row_data, file_path):
 
         header = next(csv_reader)
         columns = len(header)
-        dimension.append(columns)
+        read_column = []
 
-        for i in range(columns): column_data.append(header[i])
+        for i in range(columns):
+            if 'id' in header[i]:
+                column_data.append(header[i])
+                read_column.append(i)
 
+        if len(column_data) <= 1:
+            return
+
+        dimension.append(len(column_data))
         rows = 0
-        for i in range(columns): row_data.append([])
+        for i in range(len(column_data)): row_data.append([])
         
         for row in csv_reader:
             rows += 1
 
-            if len(row) != columns:
-                continue
-
             crt_column = 0
+            column_index = 0
             for item in row:
-                row_data[crt_column].append(item)
+                if crt_column in read_column:
+                    row_data[column_index].append(item)
+                    column_index += 1
                 crt_column += 1
 
         dimension.append(rows)
@@ -83,7 +91,8 @@ def countEdge(column_datas, row_datas, original_ids, num_vertex_offset, labels):
             v1_vertex_id = original_ids[v1_label_index][v1]
             v2_vertex_id = original_ids[v2_label_index][v2]
 
-            edge_set.add((v1_vertex_id, v2_vertex_id))
+            if not (v2_vertex_id, v1_vertex_id) in edge_set:
+                edge_set.add((v1_vertex_id, v2_vertex_id))
 
         i_index += 1
 
@@ -120,6 +129,7 @@ if(__name__ == "__main__"):
     print('\tDirectory: {}'.format(args[0]))
     print('--------------------------------')
 
+    start = time.process_time()
     files = getFiles(args[0], '.csv')
 
     dimensions = []
@@ -134,20 +144,14 @@ if(__name__ == "__main__"):
         row_data = []
         readCSVFile(dimension, column_data, row_data, file_path)
 
-        crt_index = 0;
-        while crt_index < len(column_data):
-            if not 'id' in column_data[crt_index]:
-                del column_data[crt_index]
-                del row_data[crt_index]
-            else:
-                crt_index += 1
-
         if len(column_data) > 1:
             dimension[0] = len(column_data)
             dimensions.append(dimension)
             column_datas.append(column_data)
             row_datas.append(row_data)
-    
+    end = time.process_time()
+    print('Time(Loading files): ' + str(end - start) + 's')
+
     print('The number of files: {}'.format(len(dimensions)))
     print('--------------------------------')
     for i in range(len(column_datas)):
@@ -157,15 +161,21 @@ if(__name__ == "__main__"):
     labels = countLabelType(column_datas)
 
     print('counting vertices...')
+    start = time.process_time()
     original_ids = [{} for i in range(len(labels))]
     num_vertex_offset = [0 for i in range(len(labels) + 1)]
     countLabelNum(labels, column_datas, row_datas, original_ids, num_vertex_offset)
     num_vertices = num_vertex_offset[-1]
+    end = time.process_time()
+    print('Time(Counting vertices): ' + str(end - start) + 's')
     print('--------------------------------')
 
     print('counting edges...')
+    start = time.process_time()
     edge_list = countEdge(column_datas, row_datas, original_ids, num_vertex_offset, labels)
     num_edges = len(edge_list)
+    end = time.process_time()
+    print('Time(Counting edges): ' + str(end - start) + 's')
     print('--------------------------------')
 
     print('|V|: {0}, |E|: {1}'.format(num_vertices, num_edges))
@@ -174,6 +184,9 @@ if(__name__ == "__main__"):
     vertex_degree = countDegree(edge_list, num_vertices)
 
     print('storing graph...')
+    start = time.process_time()
     output_file = args[0] + '.graph'
     writeGraph(output_file, num_vertices, num_edges, num_vertex_offset, vertex_degree, edge_list)
+    end = time.process_time()
+    print('Time(Storing graph): ' + str(end - start) + 's')
     print('--------------------------------')
