@@ -91,8 +91,10 @@ def countEdge(column_datas, row_datas, original_ids, num_vertex_offset, labels):
             v1_vertex_id = original_ids[v1_label_index][v1]
             v2_vertex_id = original_ids[v2_label_index][v2]
 
+            # remove duplicated edges
             if not (v2_vertex_id, v1_vertex_id) in edge_set:
-                edge_set.add((v1_vertex_id, v2_vertex_id))
+                if v2_vertex_id != v1_vertex_id:
+                    edge_set.add((v1_vertex_id, v2_vertex_id))
 
         i_index += 1
 
