@@ -93,6 +93,7 @@ def countEdge(column_datas, row_datas, original_ids, num_vertex_offset, labels):
 
             # remove duplicated edges
             if not (v2_vertex_id, v1_vertex_id) in edge_set:
+                # remove self-loop
                 if v2_vertex_id != v1_vertex_id:
                     edge_set.add((v1_vertex_id, v2_vertex_id))
 
@@ -185,9 +186,10 @@ if(__name__ == "__main__"):
 
     vertex_degree = countDegree(edge_list, num_vertices)
 
-    print('storing graph...')
     start = time.process_time()
-    output_file = args[0] + '.graph'
+    base_path = os.path.basename(args[0])
+    output_file = base_path + '.graph'
+    print('storing graph (path is ' + output_file + ')...')
     writeGraph(output_file, num_vertices, num_edges, num_vertex_offset, vertex_degree, edge_list)
     end = time.process_time()
     print('Time(Storing graph): ' + str(end - start) + 's')
